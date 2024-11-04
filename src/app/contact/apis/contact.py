@@ -6,7 +6,7 @@ import logging
 contacts_api = Blueprint('contacts_api', __name__)
 api = Api(contacts_api)
 
-
+# Define the contact model with fields for API documentation
 contact_model = api.model('Contact', {
     'id': fields.String(required=True, description='Contact ID'),
     'firstName': fields.String(required=True, description='First Name'),
@@ -29,23 +29,38 @@ contact_model = api.model('Contact', {
 class ContactList(Resource):
     @api.doc('list_contacts')
     def get(self):
+        """
+               Retrieve a list of all contacts.
+
+               Returns:
+                   list: A JSON array of contacts.
+               """
         return contacts
 
 
 @api.route('/contacts/<int:ID>/email_addresses')
 class ContactEmailList(Resource):
     @api.doc('get_contact_emails')
+    @api.response(200, 'Success', contact_model)  # Document successful response
+    @api.response(404, 'Contact not found')  # Document not found response
     def get(self, ID):
-       user = None
-       logging.info(" id i got is: ", ID)
-       print("id is", ID)
-       contact = next((contact for contact in contacts if contact['id'] == ID), None)
+        """
+        Retrieve email addresses for a specific contact by ID.
 
-       if contact:
-           return contact
-       else:
-           print("id is", ID)
-           return {'message': 'Contact not found'}, 404
+        Args:
+            ID (int): The ID of the contact to retrieve.
+
+        Returns:
+            dict: A JSON object containing the contact details, including email addresses,
+                  or a message indicating that the contact was not found.
+        """
+        user = None
+        contact = next((contact for contact in contacts if contact['id'] == ID), None)
+
+        if contact:
+            return contact
+        else:
+            return {'message': 'Contact not found'}, 404
 
 
 
